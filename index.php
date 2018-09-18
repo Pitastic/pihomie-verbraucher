@@ -32,11 +32,6 @@ require 'lib/functions.php';
 		$alleW[$id]['Steigung'] = calc_Steigerung($alleW[$id]['wert'], False);
 		$alleW[$id]['datum_M'] = getMonth($alleW[$id]['datum']);
 
-		/*
-		preOut($alleW[$id]['Steigung']);
-		preOut($alleW[$id]['datum']);
-		preOut($alleW[$id]['datum_M']);
-		*/
 		// alle aufrücken wegen Chart
 		$alleW[$id]['Steigung'] = rutschAuf($alleW[$id]['Steigung']);
 		array_shift($alleW[$id]['wert']);

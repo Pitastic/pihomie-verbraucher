@@ -24,6 +24,7 @@ function db_selVerbrauch($vID){
 	mysqli_stmt_bind_result($stmt, $id, $verbraucher, $ort, $wert, $einheit, $datum);
 	while (mysqli_stmt_fetch($stmt)) {
 		// Wasserzähler korrigieren
+		// TODO: Zählerwechsel berücksichtigen: Issue #2
 		if ( $id == 3 and strtotime($datum) > strtotime(WATER_DATE_1)) { $wert += WATER_ADD_1; }
 		$results['id'][] = $id;
 		$results['verbraucher'][] = $verbraucher;
