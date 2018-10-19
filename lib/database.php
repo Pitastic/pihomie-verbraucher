@@ -61,4 +61,17 @@ function db_selVerbraucher(){
 	return $results;
 }
 
+function db_insertZaehler($id, $val, $date){
+//-> Zählerstandsablesung eintragen
+	@$connection = new mysqli(DB_HOST, DB_USER, DB_PW, DB, DB_PORT) or die(mysqli_connect_error);
+	mysqli_set_charset($connection, "utf8");
+	$sql_string = "INSERT INTO ablesen(`verbraucher_id`, `wert`, `datum`) VALUES(?,?,?);";
+	$stmt = mysqli_prepare($connection, $sql_string) or die(mysqli_connect_error());
+	mysqli_stmt_bind_param($stmt, 'sss', $id, $val, $date);
+	mysqli_execute($stmt);
+	mysqli_stmt_close($stmt);
+	mysqli_close($connection);
+	return;
+}
+
 ?>
