@@ -32,6 +32,25 @@ function getMonth($arr_datum){
 	return $arr_datum;
 }
 
+function diffDates($from, $to){
+	// Create Dateobject
+	$from = strtotime($from);
+	$to = strtotime($to);
+
+	$diff = abs($to - $from);	  
+	// Year: Divide into total seconds in a year
+	$years = floor($diff / (365*60*60*24));
+	// Month: Divide into total seconds in a month
+	$months = floor(($diff - $years * 365*60*60*24)
+									/ (30*60*60*24));
+	// Day: Subtract it with years and months
+	//		and divide into total seconds in a day
+	$days = floor(($diff - $years * 365*60*60*24 -
+					$months*30*60*60*24)/ (60*60*24));
+	return array(
+		"Y" => $years, "M" => $months, "D" => $days
+	);
+}
 
 function rutschAuf($arr, $kick=false){
 	if ($kick) {array_pop($arr);}

@@ -49,7 +49,6 @@ if (isset($_POST['eingeben'])) {
 		}else{
 			$from = $_POST['start_punkt'];
 			$to = $_POST['end_punkt'];
-
 		}
 		$results = db_selVerbrauch($_POST['verbraucher'], $from, $to);
 		$results['Steigung'] = calc_Steigerung($results['wert'], False);
@@ -59,13 +58,29 @@ if (isset($_POST['eingeben'])) {
 		//array_unshift($results['Steigung'], null);
 		$results['Steigung'] = rutschAuf($results['Steigung']);
 
+		// Summe des Verbrauchs
+		$gesamtVerbrauch = $results['wert'][count($results['wert'])-1] - $results['wert'][0];
+		// Anzahl der zu erwartenden Datenpunkte (1/Monat)
+		$expectedPoints = diffDates($from, $to)['M'];
 		?>
 
 		<div class="w3-card-2 w3-section w3-margin">
-		<div class="w3-container w3-padding w3-black"><?php echo $results['verbraucher'][0]." in ".$results['einheit'][0];?></div>
+			<header class="w3-container w3-padding w3-black">
+				<?php echo $results['verbraucher'][0]." in ".$results['einheit'][0];?>
+			</header>
 			<div class="w3-container">
 				<canvas width="300" height="150" id="LineChart0"></canvas>
 			</div>
+			<footer class="w3-container w3-padding w3-sand">
+				<?php echo "
+				<p>
+					Der Gesamtverbrauch betrug in der Zeit vom " . $from . " bis " . $to . " insgesamt <b>". $gesamtVerbrauch ." ". $results['einheit'][0] ."</b> .
+				</p>
+				<p>
+					Es wurden " . count($results['wert']) . " (von " . $expectedPoints . ") Datenpunkte eingetragen.
+				</p>
+				"; ?>
+			</footer>
 		</div>
 		
 		<?php
@@ -90,7 +105,9 @@ if (isset($_POST['eingeben'])) {
 		
 	?>	
 		<div class="w3-card-2 w3-section w3-margin">
-			<div class="w3-container w3-padding w3-black"><?php echo $arr_V['verbraucher']." in ".$alleW[$id]['einheit'][0];?></div>
+			<header class="w3-container w3-padding w3-black">
+				<?php echo $arr_V['verbraucher']." in ".$alleW[$id]['einheit'][0];?>
+			</header>
 			<div class="w3-container">
 				<canvas width="300" height="150" id="LineChart<?php echo $id;?>"></canvas>
 			</div>
