@@ -1,6 +1,6 @@
 <?php
 
-function db_selVerbrauch($vID){
+function db_selVerbrauch($vID, $from, $to){
 //-> Datenreihe für einen Verbraucher selektieren
 	$results = array(
 		'id'		=> array(),
@@ -12,14 +12,29 @@ function db_selVerbrauch($vID){
 	);
 	@$connection = new mysqli(DB_HOST, DB_USER, DB_PW, DB, DB_PORT);
 	mysqli_set_charset($connection, "utf8");
-	$sql_string = "
-	SELECT verbraucher_id, verbraucher, ort, wert, einheit, datum FROM `Alle`
-	WHERE verbraucher_id = ?
-	ORDER BY `Alle`.`datum` ASC
-	LIMIT 0,25
-	";
-	$stmt = mysqli_prepare($connection, $sql_string) or die("DB Fehler (db_selVerbrauch)");
-	mysqli_stmt_bind_param($stmt, 'd', $vID);
+	if (!isset($from)) {
+		// die neusten 12 Einträge (1 Jahr)
+		$sql_string = "
+		SELECT * FROM (
+			SELECT verbraucher_id, verbraucher, ort, wert, einheit, datum FROM `Alle`
+			WHERE verbraucher_id = ?
+			ORDER BY `Alle`.`datum` DESC
+			LIMIT 0,12
+		) as table1 ORDER by table1.datum ASC
+		";
+		$stmt = mysqli_prepare($connection, $sql_string) or die("DB Fehler (db_selVerbrauch)");
+		mysqli_stmt_bind_param($stmt, 'd', $vID);
+	}else{
+		// Alle Einträge der Zeitspanne
+		$sql_string = "
+		SELECT verbraucher_id, verbraucher, ort, wert, einheit, datum FROM `Alle`
+		WHERE verbraucher_id = ? AND
+		datum >= ? AND datum <= ?
+		ORDER BY `Alle`.`datum` ASC
+		";
+		$stmt = mysqli_prepare($connection, $sql_string) or die("DB Fehler (db_selVerbrauch)");
+		mysqli_stmt_bind_param($stmt, 'dss', $vID, $from, $to);
+	}
 	mysqli_execute($stmt);
 	mysqli_stmt_bind_result($stmt, $id, $verbraucher, $ort, $wert, $einheit, $datum);
 	while (mysqli_stmt_fetch($stmt)) {

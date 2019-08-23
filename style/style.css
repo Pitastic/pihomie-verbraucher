@@ -2,3 +2,5 @@ html, body {
 	margin: 0;
 	padding: 0;
 }
+
+button, .w3-btn, .w3-button, input, .w3-input { cursor: pointer; }

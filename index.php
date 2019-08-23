@@ -4,7 +4,7 @@ require 'lib/globals.php';
 require 'lib/database.php';
 require 'lib/functions.php';
 
-if (isset($_POST['abschicken'])) {
+if (isset($_POST['eingeben'])) {
 	if (count($_POST['ids']) and isset($_POST['datum'])) {
 		$ids = $_POST['ids'];
 		for ($i=0; $i < count($ids); $i++) { 
@@ -13,7 +13,7 @@ if (isset($_POST['abschicken'])) {
 			}
 		}
 	}
-	header("Location: ".$_SERVER['PHP_SELF']);
+	header("Location: ".$_SERVER['PHP_SELF']."?msg=gespeichert");
 }
 
 ?>
@@ -28,16 +28,51 @@ if (isset($_POST['abschicken'])) {
 
 <body>
 	<header class="w3-container w3-light.gray w3-padding">
-		<h1>Verbraucher im Haus</h1>
+		<h1>Verbraucher im Haus
+			<a href="index.php" class="w3-button w3-right">&#127968;</a>
+			<a href="javascript:toggleModal('query');" class="w3-button w3-right">&#128269;</a>
+		</h1>
 	</header>
 
 	<div class="w3-container w3-margin-bottom" id="content">
 
 	<?php
+
 	$alleV = db_selVerbraucher();
+
+	if (isset($_POST['query'])){	// Abfrage an die Daten ---
+
+		if ($_POST['query_type'] == "jahr") {
+			$from = $_POST['jahr'] . "-01-01";
+			$to = $_POST['jahr'] . "-12-31";
+		}else{
+			$from = $_POST['start_punkt'];
+			$to = $_POST['end_punkt'];
+
+		}
+		$results = db_selVerbrauch($_POST['verbraucher'], $from, $to);
+		$results['Steigung'] = calc_Steigerung($results['wert'], False);
+		$results['datum_M'] = getMonth($results['datum']);
+
+		// alle aufrücken wegen Chart
+		//array_unshift($results['Steigung'], null);
+		$results['Steigung'] = rutschAuf($results['Steigung']);
+
+		?>
+
+		<div class="w3-card-2 w3-section w3-margin">
+		<div class="w3-container w3-padding w3-black"><?php echo $results['verbraucher'][0]." in ".$results['einheit'][0];?></div>
+			<div class="w3-container">
+				<canvas width="300" height="150" id="LineChart0"></canvas>
+			</div>
+		</div>
+		
+		<?php
+		$alleW[0] = $results;
+	
+	}else{	// Normale Anzeige ---
+	
 	$alleW = [];
-
-
 	foreach ($alleV as $id => $arr_V) {
 		echo "<!-- LineChart: ".$arr_V['verbraucher']." -->";
 		$alleW[$id] = db_selVerbrauch($id);
@@ -45,9 +80,10 @@ if (isset($_POST['abschicken'])) {
 		$alleW[$id]['datum_M'] = getMonth($alleW[$id]['datum']);
 
 		// alle aufrücken wegen Chart
+		//array_unshift($alleW[$id]['Steigung'], null)
 		$alleW[$id]['Steigung'] = rutschAuf($alleW[$id]['Steigung']);
-		array_shift($alleW[$id]['wert']);
-		array_shift($alleW[$id]['datum_M']);
+		//array_shift($alleW[$id]['wert']);
+		//array_shift($alleW[$id]['datum_M']);
 		
 	?>	
 		<div class="w3-card-2 w3-section w3-margin">
@@ -59,14 +95,15 @@ if (isset($_POST['abschicken'])) {
 	
 	<?php
 	}
+	// Ende 'else'
+	}
 	?>
-
 	</div>
 
-	<div id="modal" class="w3-modal" style="display: none;">
+	<div id="add" class="w3-modal" style="display: none;">
 	<div class="w3-modal-content w3-card-2 w3-animate-bottom">
 		<header class="w3-container w3-black">
-			<span onclick="document.getElementById('modal').style.display='none'" class="w3-button w3-display-topright">&times;</span>
+			<span onclick="toggleModal('add', true);" class="w3-button w3-display-topright">&times;</span>
 			<h2>Zählerstand ablesen</h2>
 		</header>
 		<form method="POST" action="<?php echo $_SERVER['PHP_SELF']; ?>">
@@ -83,19 +120,57 @@ if (isset($_POST['abschicken'])) {
 				?>
 			</div>
 			<footer class="w3-container">
-				<p><input type="submit" name="abschicken" value="speichern" class="w3-input w3-green"></p>
+				<p><input type="submit" name="eingeben" value="speichern" class="w3-input w3-green"></p>
+			</footer>
+		</form>
+	</div>
+	</div>
+
+	<div id="query" class="w3-modal" style="display: none;">
+	<div class="w3-modal-content w3-card-2 w3-animate-bottom">
+		<header class="w3-container w3-black">
+			<span onclick="toggleModal('query', true);" class="w3-button w3-display-topright">&times;</span>
+			<h2>Verbrauch abfragen</h2>
+		</header>
+		<form method="POST" action="<?php echo $_SERVER['PHP_SELF']; ?>">
+			<div class="w3-container">
+				<p>
+					<input type="radio" name="query_type" value="jahr">
+					<label>Nach Jahr:</label>
+					<input type="number" class="w3-input" name="jahr">
+				</p>
+				<p>
+					<input type="radio" name="query_type" value="zeit">
+					<label>Nach eigener Zeitspanne:</label>
+					<input type="date" class="w3-input" name="start_punkt">
+					<input type="date" class="w3-input" name="end_punkt">
+				
+				</p>
+				<p>
+				<select name="verbraucher" class="w3-input">
+					<?php
+					foreach ($alleV as $id => $verbraucher) {
+						echo '<option value="'. $id .'">' . $verbraucher['verbraucher'] . '</option>';
+					}
+					?>
+				</select>
+				</p>
+			</div>
+			<footer class="w3-container">
+				<p><input type="submit" name="query" value="speichern" class="w3-input w3-green"></p>
 			</footer>
 		</form>
 	</div>
 	</div>
 
 	<footer class="w3-margin-top">
-		<button class="w3-input w3-blue w3-xlarge" onclick="document.getElementById('modal').style.display='block'">Zählerstand eintragen</button>
+		<button class="w3-input w3-blue w3-xlarge" onclick="toggleModal('add')">Zählerstand eintragen</button>
 	</footer>
 
 	<!-- Chart.js -->
 	<script type="text/javascript" src="lib/functions.js"></script>
 	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.6.0/Chart.bundle.min.js"></script>
+
 	<script type="text/javascript">
 		var ctx, lineKoordinaten, lineKoordinaten2, lineLabels;
 

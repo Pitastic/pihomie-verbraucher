@@ -13,7 +13,7 @@ function calc_Steigerung($arr_Vals, $inProzent=True){
 			}else{
 				$previous = floatval($arr_Vals[$idx-1]);
 			}
-			$arr_Steigerung[$idx] = ($inProzent) ? (($next-$previous)/$previous)*100: ($next-$previous);
+			$arr_Steigerung[$idx] = ($inProzent) ? round( (($next-$previous)/$previous)*100 , 2) : round( ($next-$previous) , 2);
 		}else{
 			$first = $next;
 		}
@@ -27,7 +27,7 @@ function getMonth($arr_datum){
 	for ($i=0; $i < count($arr_datum); $i++) {
 		$temp = explode("-", $arr_datum[$i]);
 		$m = intval($temp[1]);
-		$arr_datum[$i] = $monate[$m];
+		$arr_datum[$i] = $monate[$m] ." '". substr($temp[0], 2);
 	}
 	return $arr_datum;
 }
