@@ -41,6 +41,7 @@ if (isset($_POST['eingeben'])) {
 	$alleV = db_selVerbraucher();
 
 	if (isset($_POST['query'])){	// Abfrage an die Daten ---
+		$MODE = "query";
 
 		if ($_POST['query_type'] == "jahr") {
 			$from = $_POST['jahr'] . "-01-01";
@@ -71,6 +72,8 @@ if (isset($_POST['eingeben'])) {
 		$alleW[0] = $results;
 	
 	}else{	// Normale Anzeige ---
+	
+	$MODE = "home";
 	
 	$alleW = [];
 	foreach ($alleV as $id => $arr_V) {
@@ -135,12 +138,12 @@ if (isset($_POST['eingeben'])) {
 		<form method="POST" action="<?php echo $_SERVER['PHP_SELF']; ?>">
 			<div class="w3-container">
 				<p>
-					<input type="radio" name="query_type" value="jahr">
+					<input type="radio" name="query_type" value="jahr" required="required">
 					<label>Nach Jahr:</label>
 					<input type="number" class="w3-input" name="jahr">
 				</p>
 				<p>
-					<input type="radio" name="query_type" value="zeit">
+					<input type="radio" name="query_type" value="zeit" required="required">
 					<label>Nach eigener Zeitspanne:</label>
 					<input type="date" class="w3-input" name="start_punkt">
 					<input type="date" class="w3-input" name="end_punkt">
@@ -157,15 +160,21 @@ if (isset($_POST['eingeben'])) {
 				</p>
 			</div>
 			<footer class="w3-container">
-				<p><input type="submit" name="query" value="speichern" class="w3-input w3-green"></p>
+				<p><input type="submit" name="query" value="suchen" class="w3-input w3-green"></p>
 			</footer>
 		</form>
 	</div>
 	</div>
 
+
+	<?php if ($MODE == "home") { ?>
+
 	<footer class="w3-margin-top">
 		<button class="w3-input w3-blue w3-xlarge" onclick="toggleModal('add')">Zählerstand eintragen</button>
 	</footer>
+
+	<?php } ?>
+
 
 	<!-- Chart.js -->
 	<script type="text/javascript" src="lib/functions.js"></script>
