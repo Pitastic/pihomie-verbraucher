@@ -8,7 +8,7 @@ define("DB_HOST", "localhost");
 define("DB_PORT", 3306);
 
 // Zählerkorrekturen (Einbau neuer Zähler)
-define(WATER_ADD_1, 518);
-define(WATER_DATE_1, "2018-03-01");
+define("WATER_ADD_1", 518);
+define("WATER_DATE_1", "2018-03-01");
 
 ?>
