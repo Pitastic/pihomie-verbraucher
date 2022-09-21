@@ -53,6 +53,16 @@ function rutschAuf($arr, $kick=false){
     return $sorted;
 }
 
+function fillUp(&$arr, $ungrade=true, $fill=null){
+    for ($idx=0; $idx < count($arr); $idx++) { 
+        if (($ungrade && $idx % 2) || (!$ungrade && !($idx % 2))){
+            // ungrade und Index ungerade || even und Index gerade
+            array_splice( $arr, $idx, 0, array($fill) );
+        }
+    }
+    return $arr;
+}
+
 // DEV Funktionen
 function preOut($var){
     echo "<pre>";

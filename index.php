@@ -55,13 +55,18 @@ if (isset($_POST['eingeben'])) {
         $results['datum_M'] = getMonth($results['datum']);
 
         // alle aufrücken wegen Chart
-        //array_unshift($results['Steigung'], null);
         $results['Steigung'] = rutschAuf($results['Steigung']);
+
+        // Verbrauch zwischen den Ablesepunkten darstellen:
+        //-- Jeder ungrade Steigungswert muss 'null' sein ('Steigung')
+        fillUp($results['Steigung'], $ungrade=false);
+        //-- Jeder gerade Ablesungs-Wert muss 'null' sein ('wert')
+        fillUp($results['wert'], $ungrade=true);
+        //-- Add '' nach jedem zweiten Monat ('datum_M')
+        fillUp($results['datum_M'], $ungrade=true, '');
 
         // Summe des Verbrauchs
         $gesamtVerbrauch = $results['wert'][count($results['wert'])-1] - $results['wert'][0];
-        // Anzahl der zu erwartenden Datenpunkte (1/Monat)
-        $expectedPoints = diffDates($from, $to)['M'];
         ?>
 
         <div class="w3-card-2 w3-section w3-margin">
@@ -75,9 +80,6 @@ if (isset($_POST['eingeben'])) {
                 <?php echo "
                 <p>
                     Der Gesamtverbrauch betrug in der Zeit vom " . $from . " bis " . $to . " insgesamt <b>". $gesamtVerbrauch ." ". $results['einheit'][0] ."</b> .
-                </p>
-                <p>
-                    Es wurden " . count($results['wert']) . " (von " . $expectedPoints . ") Datenpunkte eingetragen.
                 </p>
                 "; ?>
             </footer>
@@ -98,10 +100,15 @@ if (isset($_POST['eingeben'])) {
         $alleW[$id]['datum_M'] = getMonth($alleW[$id]['datum']);
 
         // alle aufrücken wegen Chart
-        //array_unshift($alleW[$id]['Steigung'], null)
         $alleW[$id]['Steigung'] = rutschAuf($alleW[$id]['Steigung']);
-        //array_shift($alleW[$id]['wert']);
-        //array_shift($alleW[$id]['datum_M']);
+
+        // Verbrauch zwischen den Ablesepunkten darstellen:
+        //-- Jeder ungrade Steigungswert muss 'null' sein ('Steigung')
+        fillUp($alleW[$id]['Steigung'], $ungrade=false);
+        //-- Jeder gerade Ablesungs-Wert muss 'null' sein ('wert')
+        fillUp($alleW[$id]['wert'], $ungrade=true);
+        //-- Add '' nach jedem zweiten Monat ('datum_M')
+        fillUp($alleW[$id]['datum_M'], $ungrade=true, '');
         
     ?>	
         <div class="w3-card-2 w3-section w3-margin">
@@ -200,7 +207,7 @@ if (isset($_POST['eingeben'])) {
     <script type="text/javascript">
         var ctx, lineKoordinaten, lineKoordinaten2, lineLabels;
 
-<?php 	foreach ($alleW as $id => $arr_W) {		?>
+<?php	foreach ($alleW as $id => $arr_W) {		?>
             ctx = document.getElementById("LineChart<?php echo $id;?>").getContext("2d");
             lineKoordinaten = <?php echo json_encode($arr_W['wert']); ?>;
             lineKoordinaten2 = <?php echo json_encode($arr_W['Steigung']); ?>;
@@ -209,7 +216,7 @@ if (isset($_POST['eingeben'])) {
             drawLineChart(ctx, lineKoordinaten, lineKoordinaten2, vName, lineLabels);
 
 <?php 	} ?>
-        
+
         ctx = lineKoordinaten = lineKoordinaten2 = lineLabels = false;
 
     </script>
